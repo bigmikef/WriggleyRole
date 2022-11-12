@@ -54,11 +54,33 @@ def roll_die(faces: int) -> list[int]:
     return arange(1, faces + 1).tolist()
 
 
+def inc(set_of_dice: list[int], num_faces: int) -> bool:
+    return inc(set_of_dice, 0, num_faces)
+
+
+def inc(set_of_dice: list[int], num_faces: int) -> bool:
+    for r in range(set_of_dice.__len__()):
+        next_num_found = False
+        while set_of_dice[r] < num_faces:
+            set_of_dice[r] += 1
+            next_num_found = True
+            break
+        if next_num_found:
+            break
+        else:
+            set_of_dice[r] = 1
+    # print(f"r={r} -- {set_of_dice}")
+    if r == set_of_dice.__len__() - 1:
+        return False
+    return True
+
+
 def roll_dice(num: int, faces: int) -> list[int]:
-    if num > 1:
-        return sorted(join_roll_list(faces=faces, roll_list=roll_dice(num - 1, faces)))
-    else:
-        return roll_die(faces)
+    a_roll = [1 for i in range(0, num)]
+    ret = [sum(a_roll)]
+    while inc(a_roll, faces):
+        ret.append(sum(a_roll))
+    return ret
 
 
 def prob(score: int, roll_list: list[int]) -> ProbabiltityScore:
@@ -71,17 +93,20 @@ def prob(score: int, roll_list: list[int]) -> ProbabiltityScore:
     )
 
 
-def prob_table(num_players: int, faces: int) -> dict[int, dict[int, int]]:
+def prob_table(num_players: tuple[int, int], faces: int) -> dict[int, dict[int, int]]:
     roll_lists: dict[int, list[int]] = {}
-    for num_dice in range(1, num_players + 1):
+    for num_dice in range(1, num_players[1] + 1):
+        print(f"starting dice count {num_dice}")
         roll_lists[num_dice] = roll_dice(num_dice, faces)
+        print(f"done")
 
     prob_lists: dict[int, dict[int, int]] = {}
-    for num_dice in range(1, num_players + 1):
-        die_prob_list: dict[int, int] = {}
-        for dc in range(1, (faces * num_players) + 1):
-            die_prob_list[dc] = prob_succusful_dc(dc, roll_list=roll_lists[num_dice])
+    for num_dice in range(num_players[0], num_players[1] + 1):
 
+        die_prob_list: dict[int, int] = {}
+        for dc in range(1, (faces * num_dice) + 1):
+            die_prob_list[dc] = prob_succusful_dc(dc, roll_list=roll_lists[num_dice])
+            print(f"num_dice={num_dice} dc({dc})")
         prob_lists[num_dice] = die_prob_list
 
     return prob_lists
@@ -111,7 +136,10 @@ def table_prob_list(
 
 
 def get_stuff():
-    prob_matrix = prob_table(num_players=11, faces=20)
+    min_players = 5
+    max_players = 7
+    faces = 20
+    prob_matrix = prob_table(num_players=(min_players, max_players), faces=faces)
     scores_table: dict[int, dict[DC, (int, float)]] = {}
     for num_players in sorted(prob_matrix.keys()):
         result_row: dict[DC, (int, float)] = {}
@@ -124,6 +152,16 @@ def get_stuff():
         scores_table[num_players] = result_row
 
     print(f"scores_table:{scores_table}")
+    header = ["Players"]
+    header.extend([i for i in list(DC)])
+    data = []
+    for num_players in scores_table.keys():
+        data_row = [num_players]
+        for dc in list(DC):
+            data_row.append(scores_table[num_players][dc])
+        data.append(data_row)
+
+    print(tabulate(data, headers=header))
 
 
 def main() -> int:

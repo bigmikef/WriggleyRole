@@ -1,61 +1,37 @@
 import pytest
-from wriggley_roll.calc import roll_die, roll_dice, prob
+from wriggley_roll.calc import inc
 
 
-def test_prob_of_a_12():
-    roll_list = roll_dice(num=2, faces=6)
-    result = prob(score=12, roll_list=roll_list)
-    assert result.num_at_or_higher == 1
-    assert result.num_elements == 36
-    assert result.prob == 1/36
-    
-def test_prob_of_a_10():
-    roll_list = roll_dice(num=2, faces=6)
-    result = prob(score=10, roll_list=roll_list)
-    assert result.num_at_or_higher == 6
-    assert result.num_elements == 36
-    assert result.prob == 1/6
-
-def test_roll_die_d6():
-    assert roll_die(6) == [1, 2, 3, 4, 5, 6]
+def test_inc_3d6_234():
+    set_of_dice = [2, 3, 4]
+    result = inc(set_of_dice=set_of_dice, num_faces=6)
+    assert result
+    assert set_of_dice == [3, 3, 4]
 
 
-def test_roll_dice_2d6():
-    assert roll_dice(num=2, faces=6) == [
-        2,
-        3,
-        3,
-        4,
-        4,
-        4,
-        5,
-        5,
-        5,
-        5,
-        6,
-        6,
-        6,
-        6,
-        6,
-        7,
-        7,
-        7,
-        7,
-        7,
-        7,
-        8,
-        8,
-        8,
-        8,
-        8,
-        9,
-        9,
-        9,
-        9,
-        10,
-        10,
-        10,
-        11,
-        11,
-        12,
-    ]
+def test_inc_3d6_534():
+    set_of_dice = [5, 3, 4]
+    result = inc(set_of_dice=set_of_dice, num_faces=6)
+    assert result
+    assert set_of_dice == [6, 3, 4]
+
+
+def test_inc_3d6_634():
+    set_of_dice = [6, 3, 4]
+    result = inc(set_of_dice=set_of_dice, num_faces=6)
+    assert result
+    assert set_of_dice == [1, 4, 4]
+
+
+def test_inc_3d6_664():
+    set_of_dice = [6, 6, 4]
+    result = inc(set_of_dice=set_of_dice, num_faces=6)
+    assert result
+    assert set_of_dice == [1, 1, 5]
+
+
+def test_inc_3d6_666():
+    set_of_dice = [6, 6, 6]
+    result = inc(set_of_dice=set_of_dice, num_faces=6)
+    assert not result
+    assert set_of_dice == [1, 1, 1]
