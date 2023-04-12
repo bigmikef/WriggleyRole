@@ -15,16 +15,20 @@ class AutoNumber(Enum):
 
 
 class DC(AutoNumber):
-    def __init__(self, prob: float = 0.0) -> None:
+    def __init__(self, prob: float = 0.0, per: float = 0.0) -> None:
         super().__init__()
         self.probability = prob
+        self.percentage = per
 
-    VERY_EASY = 0.90
-    EASY = 0.75
-    MODERATE = 0.50
-    HARD = 0.25
-    VERY_HARD = 0.10
-    NEARLY_IMPOSSIBLE = 0.005
+    def __str__(self) -> str:
+        return f"{self.name} - {self.percentage}"
+
+    VERY_EASY = (0.90, 90.0)
+    EASY = (0.75, 75.0)
+    MODERATE = (0.50, 50.0)
+    HARD = (0.25, 25.0)
+    VERY_HARD = (0.10, 10.0)
+    NEARLY_IMPOSSIBLE = (0.005, 0.5)
 
 
 @dataclass
@@ -136,18 +140,22 @@ def table_prob_list(
 
 
 def get_stuff():
-    min_players = 5
-    max_players = 7
+    min_players = 3
+    max_players = 8
     faces = 20
     prob_matrix = prob_table(num_players=(min_players, max_players), faces=faces)
     scores_table: dict[int, dict[DC, (int, float)]] = {}
     for num_players in sorted(prob_matrix.keys()):
-        result_row: dict[DC, (int, float)] = {}
+        result_row: dict[DC, (int, str)] = {}
         prob_row = prob_matrix[num_players]
         for _dc_level in list(DC):
             for rolled_score in sorted(prob_row.keys()):
                 if _dc_level.probability >= prob_row[rolled_score]:
-                    result_row[_dc_level] = (rolled_score, prob_row[rolled_score])
+                    _prob = f"{prob_row[rolled_score] * 100:.2f}%"
+                    result_row[_dc_level] = (
+                        rolled_score,
+                        _prob,
+                    )
                     break  # current iteration over rolled_scores for _dc_level
         scores_table[num_players] = result_row
 
